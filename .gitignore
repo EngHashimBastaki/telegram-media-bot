@@ -1,0 +1,63 @@
+# Secrets / credentials
+config.py
+*.env
+.env
+*.key
+*.pem
+
+# Cookies / browser profiles
+instagram_cookies.txt
+tiktok_chrome_profile/
+reddit_chrome_profile/
+*chrome_profile*/
+
+# Downloaded media
+downloads/
+gallery_dl/
+gallery-dl/
+
+# Test / temporary files
+reddit_test.json
+reddit_playwright_test.py
+*.tmp
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE / editor
+.vscode/
+.idea/
+.spyproject/
+
+# OS files
+Thumbs.db
+desktop.ini
+
+# Backups / local working copies
+bot_backup_*.py
+
+# Other cookies
+*_cookies.txt
+cookies*.txt
+
+# Debug dumps
+debug_*
+*.html
+
+# Old / experimental bot versions
+OLD*.py
+__old*.py
+__still*.py
+__trying*.py
+______*.py
+bot_WORKING_*.py
+bot_tiktok_auto_wait.py
+
+# Miscellaneous local files
+New Text Document.txt
+
+__Issues*.py
