@@ -86,6 +86,13 @@ def is_twitter_url(url):
         or "twitter.com/" in url
     )
 
+def is_pinterest_url(url):
+    url = url.lower()
+
+    return (
+        "pinterest.com/" in url
+        or "pin.it/" in url
+    )
 
 # --------------------------------------------------
 # FILE HELPERS
@@ -2054,6 +2061,76 @@ def download_tiktok_video_with_playwright(
 
         finally:
             context.close()
+            
+# --------------------------------------------------
+# Pinterest downloader
+# --------------------------------------------------            
+           
+def download_pinterest_media(url):
+    print()
+    print("Pinterest fallback activated.")
+
+    reset_gallery_folder()
+
+    command = [
+        sys.executable,
+        "-m",
+        "gallery_dl",
+        "--dest",
+        GALLERY_FOLDER,
+        url,
+    ]
+
+    print("Running gallery-dl for Pinterest...")
+
+    result = subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    if result.stdout:
+        print(result.stdout)
+
+    if result.stderr:
+        print(result.stderr)
+
+    if result.returncode != 0:
+        raise RuntimeError(
+            "gallery-dl could not download "
+            "the Pinterest post."
+        )
+
+    files = collect_files(
+        GALLERY_FOLDER
+    )
+    
+    media_files = [
+        filepath
+        for filepath in files
+        if is_image_file(filepath)
+    ]
+    
+    if not media_files:
+        raise FileNotFoundError(
+            "gallery-dl finished but no "
+            "Pinterest images were found."
+        )
+    
+    media_files.sort()
+
+    print(
+        f"Pinterest downloaded "
+        f"{len(media_files)} file(s)."
+    )
+
+    return (
+        media_files,
+        "Pinterest post",
+    )
+    
 # --------------------------------------------------
 # DOWNLOAD ROUTER
 # --------------------------------------------------
@@ -2133,6 +2210,25 @@ def download_media(
                     pass
         
             return download_twitter_images(
+                url
+            )
+        if is_pinterest_url(url):
+            print()
+            print(
+                "Switching to Pinterest "
+                "gallery-dl fallback..."
+            )
+        
+            if status_callback:
+                try:
+                    status_callback(
+                        "📌 Pinterest post detected.\n\n"
+                        "Trying Pinterest downloader..."
+                    )
+                except Exception:
+                    pass
+        
+            return download_pinterest_media(
                 url
             )
 
