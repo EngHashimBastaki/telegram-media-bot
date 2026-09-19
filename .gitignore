@@ -61,3 +61,7 @@ bot_tiktok_auto_wait.py
 New Text Document.txt
 
 __Issues*.py
+# Server comparison files
+bot_server_current.py
+server_diff.txt
+merged_changes.txt

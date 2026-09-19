@@ -53,9 +53,14 @@ os.makedirs(TIKTOK_PROFILE_DIR, exist_ok=True)
 # --------------------------------------------------
 
 def is_allowed(update: Update):
+    allowed_user_ids = {
+        725751,      # Hashim
+        5964172139,  # Sister
+    }
+
     return (
-        update.effective_user
-        and update.effective_user.id == ALLOWED_USER_ID
+        update.effective_user is not None
+        and update.effective_user.id in allowed_user_ids
     )
 
 
@@ -213,6 +218,17 @@ def download_with_ytdlp(url):
         "noplaylist": False,
         "quiet": False,
     }
+    
+    from urllib.parse import urlsplit
+
+    hostname = (urlsplit(url).hostname or "").lower()
+    
+    if (
+        hostname == "youtu.be"
+        or hostname == "youtube.com"
+        or hostname.endswith(".youtube.com")
+    ):
+        ydl_opts["cookiesfrombrowser"] = ("chrome",)
 
     with yt_dlp.YoutubeDL(
         ydl_opts
@@ -2585,6 +2601,21 @@ async def handle_message(
             )
 
 
+async def show_user_id(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    if (
+        update.effective_user
+        and update.effective_message
+    ):
+        await update.effective_message.reply_text(
+            f"Your Telegram user ID: "
+            f"{update.effective_user.id}\n"
+            "Send this number to Hashim "
+            "to request access."
+        )
+
 # --------------------------------------------------
 # MAIN
 # --------------------------------------------------
@@ -2678,6 +2709,14 @@ def main():
     print(
         "Press Ctrl+C to stop.\n"
     )
+    
+    app.add_handler(
+        CommandHandler(
+            "id",
+            show_user_id,
+        ),
+        group=-1,
+)
 
     app.run_polling()
 
