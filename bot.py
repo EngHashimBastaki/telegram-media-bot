@@ -2272,7 +2272,7 @@ async def send_media_file(
         filesize / (1024 * 1024)
     )
 
-    if size_mb > 49:
+    if size_mb > 1900:
         await update.message.reply_text(
             f"⚠️ Item {index} is "
             f"{size_mb:.1f} MB and is too "
