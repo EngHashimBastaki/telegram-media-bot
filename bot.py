@@ -2680,6 +2680,12 @@ def main():
     app = (
         Application.builder()
         .token(BOT_TOKEN)
+        .base_url(
+            "http://127.0.0.1:8081/bot"
+        )
+        .base_file_url(
+            "http://127.0.0.1:8081/file/bot"
+        )
         .build()
     )
 
