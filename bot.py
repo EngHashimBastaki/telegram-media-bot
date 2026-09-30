@@ -2057,6 +2057,37 @@ def download_tiktok_video_with_playwright(
                 timeout=60000,
             )
 
+            if (
+                not response.ok
+                and captured_media_candidates
+            ):
+                print(
+                    "Primary TikTok video URL failed "
+                    f"with HTTP {response.status}."
+                )
+                print(
+                    "Trying largest captured browser "
+                    "video stream..."
+                )
+
+                best_candidate = max(
+                    captured_media_candidates,
+                    key=lambda candidate: candidate["size"],
+                )
+
+                if best_candidate["size"] >= 300 * 1024:
+                    fallback_video_url = (
+                        best_candidate["url"]
+                    )
+
+                    response = context.request.get(
+                        fallback_video_url,
+                        headers={
+                            "Referer": final_url,
+                        },
+                        timeout=60000,
+                    )
+
             if not response.ok:
                 raise RuntimeError(
                     "TikTok video download failed "
