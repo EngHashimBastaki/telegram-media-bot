@@ -2146,6 +2146,101 @@ def download_pinterest_media(url):
         media_files,
         "Pinterest post",
     )
+
+def make_instagram_video_iphone_compatible(filepath):
+    extension = os.path.splitext(filepath)[1].lower()
+
+    if extension not in (
+        ".mp4",
+        ".mov",
+        ".m4v",
+        ".webm",
+    ):
+        return filepath
+
+    probe_command = [
+        "ffprobe",
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-show_entries",
+        "stream=codec_name",
+        "-of",
+        "default=noprint_wrappers=1:nokey=1",
+        filepath,
+    ]
+
+    probe_result = subprocess.run(
+        probe_command,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+    video_codec = probe_result.stdout.strip().lower()
+
+    print(
+        f"Instagram video codec: {video_codec}"
+    )
+
+    if video_codec == "h264":
+        print(
+            "Instagram video is already "
+            "iPhone-compatible."
+        )
+        return filepath
+
+    base, _ = os.path.splitext(filepath)
+
+    compatible_filepath = (
+        base + "_iphone.mp4"
+    )
+
+    print(
+        f"Converting Instagram video "
+        f"from {video_codec} to H.264..."
+    )
+
+    ffmpeg_command = [
+        "ffmpeg",
+        "-y",
+        "-i",
+        filepath,
+        "-map",
+        "0:v:0",
+        "-map",
+        "0:a:0?",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "fast",
+        "-crf",
+        "20",
+        "-pix_fmt",
+        "yuv420p",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "160k",
+        "-ar",
+        "44100",
+        "-movflags",
+        "+faststart",
+        compatible_filepath,
+    ]
+
+    subprocess.run(
+        ffmpeg_command,
+        check=True,
+    )
+
+    print(
+        "Instagram iPhone-compatible "
+        "conversion complete."
+    )
+
+    return compatible_filepath
     
 # --------------------------------------------------
 # DOWNLOAD ROUTER
@@ -2479,6 +2574,23 @@ async def handle_message(
                 status_callback,
             )
         )
+
+        if is_instagram_url(url):
+            compatible_filepaths = []
+
+            for filepath in filepaths:
+                compatible_filepath = (
+                    await asyncio.to_thread(
+                        make_instagram_video_iphone_compatible,
+                        filepath,
+                    )
+                )
+
+                compatible_filepaths.append(
+                    compatible_filepath
+                )
+
+            filepaths = compatible_filepaths
 
         total_size = sum(
             os.path.getsize(
