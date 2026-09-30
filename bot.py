@@ -80,9 +80,14 @@ def is_tiktok_photo_url(url):
     )
 def is_tiktok_video_url(url):
     url = url.lower()
+
     return (
-        "tiktok.com/" in url
-        and "/video/" in url
+        (
+            "tiktok.com/" in url
+            and "/video/" in url
+        )
+        or "vt.tiktok.com/" in url
+        or "vm.tiktok.com/" in url
     )
 def is_twitter_url(url):
     url = url.lower()
